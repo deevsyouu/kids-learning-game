@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alphabet Matching Game For Kids</title>
+<style>
+  body {
+    font-family: 'Comic Sans MS', cursive, sans-serif;
+    text-align: center;
+    background: #fef7e0;
+    margin: 0;
+    padding: 20px;
+  }
+  h1 {
+    color: #ff6f61;
+  }
+  #letter {
+    font-size: 120px;
+    margin: 30px 0;
+    color: #4a90e2;
+  }
+  #options {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 30px;
+  }
+  .option {
+    background: #ffcccb;
+    border-radius: 15px;
+    width: 80px;
+    height: 80px;
+    font-size: 48px;
+    line-height: 80px;
+    cursor: pointer;
+    user-select: none;
+    box-shadow: 2px 2px 6px #b5651d;
+    transition: background 0.3s;
+  }
+  .option:hover {
+    background: #ff9999;
+  }
+  #message {
+    font-size: 24px;
+    margin: 20px 0;
+    min-height: 30px;
+  }
+  #score {
+    font-size: 20px;
+    margin-top: 10px;
+  }
+  #restartBtn {
+    background: #4a90e2;
+    color: white;
+    border: none;
+    padding: 12px 24px;
+    font-size: 18px;
+    border-radius: 12px;
+    cursor: pointer;
+    display: none;
+  }
+  #restartBtn:hover {
+    background: #357abd;
+  }
+</style>
+</head>
+<body>
+    <h1>ALPHABETS</h1>
+<div id="letter">A</div>
+<div id="options"></div>
+<div id="message"></div>
+<div id="score"></div>
+<button id="restartBtn">Play Again</button>
+
+<script>
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('');
+  let currentIndex = 0;
+  let score = 0;
+  const totalQuestions = 5;
+
+  const letterEl = document.getElementById('letter');
+  const optionsEl = document.getElementById('options');
+  const messageEl = document.getElementById('message');
+  const scoreEl = document.getElementById('score');
+  const restartBtn = document.getElementById('restartBtn');
+
+  function shuffle(array) {
+    return array.sort(() => Math.random() - 0.5);
+  }
+
+  function playAudio(text) {
+    if ('speechSynthesis' in window) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      speechSynthesis.speak(utterance);
+    }
+  }
+
+  function loadQuestion() {
+    if (currentIndex >= totalQuestions) {
+      showSuccess();
+      return;
+    }
+
+    messageEl.textContent = '';
+    scoreEl.textContent = `Score: ${score} / ${totalQuestions}`;
+
+    const currentLetter = letters[currentIndex];
+    letterEl.textContent = currentLetter;
+    playAudio(`${currentLetter} is for ${getWordForLetter(currentLetter)}`);
+
+    // Prepare options: correct letter + 3 random different letters
+    let options = [currentLetter];
+    while (options.length < 4) {
+      const randomLetter = letters[Math.floor(Math.random() * letters.length)];
+      if (!options.includes(randomLetter)) {
+        options.push(randomLetter);
+      }
+    }
+    options = shuffle(options);
+
+    // Clear previous options
+    optionsEl.innerHTML = '';
+
+    options.forEach(option => {
+      const div = document.createElement('div');
+      div.classList.add('option');
+      div.textContent = option;
+      div.addEventListener('click', () => checkAnswer(option));
+      optionsEl.appendChild(div);
+    });
+  }
+
+  function checkAnswer(selected) {
+    const correct = letters[currentIndex];
+    if (selected === correct) {
+      score++;
+      messageEl.textContent = '🎉 Correct! Great job!';
+      messageEl.style.color = 'green';
+      currentIndex++;
+      setTimeout(loadQuestion, 1500);
+    } else {
+      messageEl.textContent = '❌ Try again!';
+      messageEl.style.color = 'red';
+    }
+    scoreEl.textContent = `Score: ${score} / ${totalQuestions}`;
+  }
+
+  function showSuccess() {
+    letterEl.textContent = '';
+    optionsEl.innerHTML = '';
+    messageEl.textContent = '🎊 You did it! Great job learning the alphabet! 🎊';
+    messageEl.style.color = 'blue';
+    scoreEl.textContent = `Final Score: ${score} / ${totalQuestions}`;
+    restartBtn.style.display = 'inline-block';
+  }
+
+  restartBtn.addEventListener('click', () => {
+    currentIndex = 0;
+    score = 0;
+    restartBtn.style.display = 'none';
+    loadQuestion();
+  });
+
+  // Helper function: simple word for letter (for audio)
+  function getWordForLetter(letter) {
+    const words = {
+      A: 'Apple',
+      B: 'Ball',
+      C: 'Cat',
+      D: 'Dog',
+      E: 'Elephant',
+      F: 'Fish',
+      G: 'Giraffe',
+      H: 'Hat',
+      I: 'Ice cream',
+      J: 'Juice',
+      K: 'Kite',
+      L: 'Lion',
+      M: 'Monkey',
+      N: 'Nest',
+      O: 'Octopus',
+      P: 'Penguin',
+      Q: 'Queen',
+      R: 'Rabbit',
+      S: 'Sun',
+      T: 'Tiger',
+      U: 'Umbrella',
+      V: 'Violin',
+      W: 'Whale',
+      X: 'Xylophone',
+      Y: 'Yacht',
+      Z: 'Zebra'
+    };
+    return words[letter] || '';
+  }
+
+  // Start game
+  loadQuestion();
+</script>
+</body>
+</html>
